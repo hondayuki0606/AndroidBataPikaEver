@@ -46,7 +46,7 @@ class TorchOnService : Service(),SensorEventListener {
         if (cameraID != null) {
             try {
                 if (lightOn) {
-                    cameraManager.setTorchMode(cameraID, false)
+                    cameraManager.setTorchMode(cameraID!!, false)
                 }
             } catch (e: CameraAccessException) {
                 e.printStackTrace()
