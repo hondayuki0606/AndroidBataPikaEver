@@ -14,7 +14,7 @@ import android.os.IBinder
 
 class TorchOnService : Service(),SensorEventListener {
     private val threshold: Float = 10f
-    private val oldValue: Float = 0f
+    private var oldValue: Float = 0f
     private lateinit var cameraManager: CameraManager
     private var cameraID: String? = null
     private var lightOn: Boolean = false
@@ -57,14 +57,35 @@ class TorchOnService : Service(),SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event == null) return
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            val zDiff = Math.abs(event.values[2] - oldValue)
+            if (zDiff > threshold) {
+                torchOn()
+            }
+            oldValue = event.values[2]
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
         return null
     }
 
+    private fun torchOn() {
+        if (cameraID != null) {
+            try {
+                if (!lightOn) {
+                    cameraManager.setTorchMode(cameraID!!, true)
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
+                } else {
+                    cameraManager.setTorchMode(cameraID!!, false)
+                }
+
+            } catch (e:CameraAccessException) {
+                e.printStackTrace()
+            }
+        }
     }
 
 }
